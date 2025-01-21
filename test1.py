@@ -48,3 +48,34 @@ for x in jsl:
 #     pass
 # for x in list:
 #     print(x)
+
+data = {
+"appealNum": 
+[{"name": "John Doe", "mail": "123@mail.com", 'phone' : "+7123415678"},
+{"name": "vasi pupi", "mail": "eqweqwe3@mail.com"},]
+}
+# Добавление нового навыка сотруднику
+# data["employees"][0]["skills"].append("Machine Learning")
+# Итерация по сотрудникам и их навыкам
+for i, user in enumerate(data['appealNum'], 0):
+  print(i, user['name'], " has mail ", user['mail'])
+
+a = 1
+user = data['appealNum'][a]
+print(a, user['name'], " has mail ", user['mail'])
+
+data = {
+"admin": 
+[{"name": "John Doe", "chat_id": "12312312312", 'password' : "qwe123" , "themes" : ["dsa", "hytrnju"]},
+{"name": "vasi pupi", "chat_id": "12312312312", 'password' : "qwe123" , "themes" : ["dsa", "reqwrqw"]}]
+}
+# Добавление нового навыка сотруднику
+# data["employees"][0]["skills"].append("Machine Learning")
+data["admin"][1]["themes"].append("foobar")
+# Итерация по сотрудникам и их навыкам
+for i, user in enumerate(data['admin'], 0):
+  print(i, user['name'], " has chat_id ", user['chat_id'], "has themes:", " ".join(user["themes"]))
+
+a = 1
+user = data['admin'][a]
+print(a, user['name'], " has chat_id ", user['chat_id'])

@@ -8,7 +8,6 @@ import os.path
 import sys
 
 
-
 SECRET_KEY=str(sys.argv[1])
 bot = telebot.TeleBot(SECRET_KEY);
 

@@ -49,19 +49,21 @@ x = list(map(lambda x: x['num'], jsl))
 # # for x in list:
 # #     print(x)
 
-# data = {
-# "appealNum": 
-# [{"name": "John Doe", "mail": "123@mail.com", "phone" : "+7123415678"},
-# {"name": "vasi pupi", "mail": "eqweqwe3@mail.com"}]
-# }
-# # Добавление нового навыка сотруднику
-# # data["employees"][0]["skills"].append("Machine Learning")
-# # Итерация по сотрудникам и их навыкам
-# for i, user in enumerate(data['appealNum'], 0):
-#   print(i, user['name'], " has mail ", user['mail'])
-# a = 1
-# user = data['appealNum'][a]
-# print(a, user['name'], " has mail ", user['mail'])
+data = {
+"appealNum": 
+[{"name": "John Doe", "mail": "123@mail.com", "phone" : "+7123415678"},
+{"name": "vasi pupi", "mail": "eqweqwe3@mail.com"}]
+}
+name = "ffoobat"
+data["appealNum"].append({"name": name, "mail": "aaa@mail.com", "phone" : "+4578"})
+# Добавление нового навыка сотруднику
+# data["appealNum"][0]["skills"].append("Machine Learning")
+# Итерация по сотрудникам и их навыкам
+for i, user in enumerate(data['appealNum'], 0):
+  print(i, user['name'], " has mail ", user['mail'])
+a = 1
+user = data['appealNum'][a]
+print(a, user['name'], " has mail ", user['mail'])
 
 
 # data = {
@@ -80,6 +82,6 @@ x = list(map(lambda x: x['num'], jsl))
 # user = data['admin'][a]
 # print(a, user['name'], " has chat_id ", user['chat_id'])
 
-themes = ["ЖКХ", "Транспорт", "Образование"]
-for i in themes:
-   print(i[:2])
+# themes = ["ЖКХ", "Транспорт", "Образование"]
+# for i in themes:
+#    print(i[:2])

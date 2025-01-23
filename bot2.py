@@ -11,7 +11,7 @@ import sys
 SECRET_KEY=str(sys.argv[1])
 bot = telebot.TeleBot(SECRET_KEY);
 
-user = {}
+user = []
 admin = {}
 adminList = {}
 adminThemesList = []
@@ -37,47 +37,102 @@ welcome = ['Приветствуем в боте регистрации заяв
 
 @bot.message_handler(content_types=['text'])
 def start(message):
-    global appealNum
     chat_id = message.chat.id
     if message.text == '/start':
-        try:
-            data = openfile("users.db", chat_id)
-        except:
-            bot.send_message(chat_id, 'IO exception');
-        else:
-            # for i, usr in enumerate(data['appealNum'], 0):
-                # msg = (str(i) + usr['name'] + " has mail " + usr['mail'])
-                # bot.send_message(chat_id, msg)
-            bot.send_message(chat_id, welcome)
-            generate_menu(themes, chat_id)
+        user_branch(message)
     elif message.text == '/admin':
-        generate_menu(admin_btn, chat_id)
+        admin_branch(message)
+    elif message.text == '/superadmin':
+        superadmin_branch(message)
     else:
         bot.send_message(chat_id, 'Напишите /start');
 
-    # appealNum += 1
-    # # print(f'current appealNum: {appealNum}')
-    # chat_id = message.chat.id
-    # global userMode
-    # keyboard = telebot.types.InlineKeyboardMarkup()
-    # if message.text == '/start':
-    #     bot.send_message(chat_id, "Добро пожаловать в бот пользователь:");
-    #     userMode = 1
-    #     # testFun(message)
-    #     # return True
-    #     for i in range(len(themes)):
-    #         button[i] = telebot.types.InlineKeyboardButton(text=themes[i], callback_data=f'{i}')
-    #         keyboard.row(button[i])
-    #     bot.send_message(chat_id, 'Выберите тему для обращения', reply_markup=keyboard)
-    # elif message.text == '/admin':
-    #     # testFun(message)
-    #     # return True
-    #     for i in range(len(admin_btn)):
-    #         button[i] = telebot.types.InlineKeyboardButton(text=admin_btn[i], callback_data=admin_btn_callback[i])
-    #         keyboard.add(button[i])
-    #     bot.send_message(chat_id, 'Административная панель:', reply_markup=keyboard)
-    # else:
-    #     bot.send_message(chat_id, 'Напишите /start');
+# user branch***********************************************************
+def user_branch(message):
+    chat_id = message.chat.id
+    global user
+    try:
+        user = openfile("users.db", chat_id)
+    except:
+        bot.send_message(chat_id, 'IO exception')
+    else:
+        print("db opened successfull")
+    #     # for i, usr in enumerate(data['appealNum'], 0):
+    #         # msg = (str(i) + usr['name'] + " has mail " + usr['mail'])
+    #         # bot.send_message(chat_id, msg)
+    bot.send_message(chat_id, welcome)
+    generate_menu(themes, chat_id)
+    bot.register_next_step_handler(message, save_name)
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_worker(call):
+    message = call.message
+    chat_id = message.chat.id
+    message_id = message.message_id
+    selTheme = 0
+    # for i in range(len(themes)):
+    #     if call.data == f'{i}': 
+    #         selTheme = i
+    #         # print(selTheme)
+    #         bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=f'Тема выбрана - {themes[selTheme]}')
+    #         user['prop']['selected_theme'] = themes[selTheme]
+    user_data(message)
+
+
+def user_data(message):
+    global user
+    chat_id = message.chat.id
+    bot.send_message(chat_id, 'Укажите своё ФИО')
+    bot.register_next_step_handler(message, save_name)
+    
+def save_name(message):
+    global user
+    chat_id = message.chat.id
+    name = message.text
+    user["appealNum"].append({"name": name})
+    for i, user in enumerate(user['appealNum'], 0):
+        nm = user['name']
+        bot.send_message(chat_id, f'{i}, {nm}')
+    bot.send_message(chat_id, f'Отлично, {name} {chat_id}. Теперь укажите свою почту')
+    bot.register_next_step_handler(message, save_email)
+
+def save_email(message):
+    chat_id = message.chat.id
+    email = message.text
+    name = user['prop']['name']
+    user['prop']['email'] = email
+    bot.send_message(chat_id, f'Отлично, {name} {chat_id}. Ваша почта {email}. Теперь укажите свой телефон в формате +79001234567')
+    bot.register_next_step_handler(message, save_phone)
+    
+def save_phone(message):
+    chat_id = message.chat.id
+    phone = message.text
+    name = user['prop']['name']
+    user['prop']['phone'] = phone
+    if phone[1:].isdigit():
+        try: 
+            carrier._is_mobile(number_type(phonenumbers.parse(phone)))
+        except:
+            bot.send_message(chat_id, f'Внимание, {name} {chat_id}, {phone} неверный!!')
+            bot.register_next_step_handler(message, save_phone)
+        else:
+            bot.send_message(chat_id, f'Отлично, {name} {chat_id}. {phone} верный!\nТеперь укажите текст обращения.')
+            # bot.register_next_step_handler(message, save_appeal)
+    else:
+        bot.send_message(chat_id, f'Внимание, {name} {chat_id}, {phone} - указан неверно, укажите заново!')
+        bot.register_next_step_handler(message, save_phone)
+
+# admin branch***********************************************************
+def admin_branch(message):
+    chat_id = message.chat.id
+    generate_menu(admin_btn, chat_id)
+
+# superadmin branch***********************************************************
+def superadmin_branch(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "dummy superadmin_branch")
+
+
 
 def openfile(name, chat_id):
     if(os.path.isfile(name)):

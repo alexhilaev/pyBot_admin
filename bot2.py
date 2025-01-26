@@ -11,7 +11,8 @@ import sys
 SECRET_KEY=str(sys.argv[1])
 bot = telebot.TeleBot(SECRET_KEY);
 
-user = []
+user = {}
+users = {}
 admin = {}
 adminList = {}
 adminThemesList = []
@@ -50,9 +51,9 @@ def start(message):
 # user branch***********************************************************
 def user_branch(message):
     chat_id = message.chat.id
-    global user
+    global users
     try:
-        user = openfile("users.db", chat_id)
+        users = openfile("users.db", chat_id)
     except:
         bot.send_message(chat_id, 'IO exception')
     else:
@@ -62,25 +63,25 @@ def user_branch(message):
     #         # bot.send_message(chat_id, msg)
     bot.send_message(chat_id, welcome)
     generate_menu(themes, chat_id)
-    bot.register_next_step_handler(message, save_name)
+    # bot.register_next_step_handler(message, save_name)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
+    global user
     message = call.message
     chat_id = message.chat.id
     message_id = message.message_id
     selTheme = 0
-    # for i in range(len(themes)):
-    #     if call.data == f'{i}': 
-    #         selTheme = i
-    #         # print(selTheme)
-    #         bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=f'Тема выбрана - {themes[selTheme]}')
-    #         user['prop']['selected_theme'] = themes[selTheme]
+    for theme in themes:
+        if call.data == theme[:3]: 
+            # print(selTheme)
+            bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=f'Тема выбрана - {theme}')
+            user.update({'selected_theme' : theme})
+            bot.send_message(chat_id, f'debug stage: callback_worker: {user}')
     user_data(message)
 
 
 def user_data(message):
-    global user
     chat_id = message.chat.id
     bot.send_message(chat_id, 'Укажите своё ФИО')
     bot.register_next_step_handler(message, save_name)
@@ -89,37 +90,38 @@ def save_name(message):
     global user
     chat_id = message.chat.id
     name = message.text
-    user["appealNum"].append({"name": name})
-    for i, user in enumerate(user['appealNum'], 0):
-        nm = user['name']
-        bot.send_message(chat_id, f'{i}, {nm}')
-    bot.send_message(chat_id, f'Отлично, {name} {chat_id}. Теперь укажите свою почту')
+    user.update({'user_id' : chat_id, 'name' : name})
+    bot.send_message(chat_id, f'debug stage: save_name: {user}')
+    bot.send_message(chat_id, f'Отлично, {name}. Теперь укажите свою почту')
     bot.register_next_step_handler(message, save_email)
 
 def save_email(message):
+    global user
     chat_id = message.chat.id
     email = message.text
-    name = user['prop']['name']
-    user['prop']['email'] = email
-    bot.send_message(chat_id, f'Отлично, {name} {chat_id}. Ваша почта {email}. Теперь укажите свой телефон в формате +79001234567')
+    name = user['name']
+    user.update({'email' : email})
+    bot.send_message(chat_id, f'debug stage: save_email: {user}')
+    bot.send_message(chat_id, f'Отлично, {name}. Ваша почта {email}. Теперь укажите свой телефон в формате +79001234567')
     bot.register_next_step_handler(message, save_phone)
     
 def save_phone(message):
     chat_id = message.chat.id
     phone = message.text
-    name = user['prop']['name']
-    user['prop']['phone'] = phone
+    name = user['name']
     if phone[1:].isdigit():
         try: 
             carrier._is_mobile(number_type(phonenumbers.parse(phone)))
         except:
-            bot.send_message(chat_id, f'Внимание, {name} {chat_id}, {phone} неверный!!')
+            bot.send_message(chat_id, f'Внимание, {name}, {phone} неверный!!')
             bot.register_next_step_handler(message, save_phone)
         else:
-            bot.send_message(chat_id, f'Отлично, {name} {chat_id}. {phone} верный!\nТеперь укажите текст обращения.')
+            bot.send_message(chat_id, f'Отлично, {name}. {phone} верный!\nТеперь укажите текст обращения.')
+            user.update({'phone' : phone})
+            bot.send_message(chat_id, f'debug stage: save_phone: {user}')
             # bot.register_next_step_handler(message, save_appeal)
     else:
-        bot.send_message(chat_id, f'Внимание, {name} {chat_id}, {phone} - указан неверно, укажите заново!')
+        bot.send_message(chat_id, f'Внимание, {name}, {phone} - указан неверно, укажите заново!')
         bot.register_next_step_handler(message, save_phone)
 
 # admin branch***********************************************************
